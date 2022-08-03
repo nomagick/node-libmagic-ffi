@@ -2,6 +2,12 @@
     "cSpell.words": [
         "carray",
         "cstruct",
-        "libmagic"
+        "fpath",
+        "getflags",
+        "getparam",
+        "getpath",
+        "libmagic",
+        "setflags",
+        "setparam"
     ]
 }

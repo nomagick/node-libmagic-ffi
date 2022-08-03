@@ -1,6 +1,6 @@
 {
   "name": "libmagic",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "description": "Node bindings for libmagic using ffi",
   "main": "build/index.js",
   "types": "build/index.d.ts",
@@ -13,6 +13,7 @@
   "url": "https://github.com/nomagick/node-libmagic-ffi.git",
   "dependencies": {
     "ffi-napi": "^4.0.3",
+    "generic-pool": "^3.8.2",
     "ref-array-di": "^1.2.2",
     "ref-napi": "^3.0.3",
     "ref-struct-di": "^1.1.1",

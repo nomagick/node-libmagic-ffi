@@ -6,12 +6,12 @@ export default {
     '^.+\\.ts$': 'ts-jest'
   },
   coverageReporters: ['json', 'text-summary'],
-  collectCoverageFrom: ['src/**'],
+  collectCoverageFrom: ['src/**', 'build/**'],
   coveragePathIgnorePatterns: [
-    '/src/test/',
     '.spec.ts$',
     '.json$'
   ],
+  coverageProvider: 'v8',
   reporters: [
     'default'
   ],

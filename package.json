@@ -1,6 +1,6 @@
 {
   "name": "libmagic-ffi",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Node bindings for libmagic using ffi",
   "main": "build/index.js",
   "types": "build/index.d.ts",
@@ -10,7 +10,8 @@
   },
   "author": "Yanlong Wang <nomagick@naiver.org>",
   "license": "MIT",
-  "url": "https://github.com/nomagick/node-libmagic-ffi.git",
+  "homepage": "https://github.com/nomagick/node-libmagic-ffi",
+  "url": "https://github.com/nomagick/node-libmagic-ffi",
   "dependencies": {
     "ffi-napi": "^4.0.3",
     "generic-pool": "^3.8.2",

@@ -1,5 +1,5 @@
 {
-  "name": "libmagic",
+  "name": "libmagic-ffi",
   "version": "0.0.0",
   "description": "Node bindings for libmagic using ffi",
   "main": "build/index.js",

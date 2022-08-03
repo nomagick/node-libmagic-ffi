@@ -38,6 +38,14 @@ describe('Wrapper with pool', () => {
         await expect(r).resolves.toContain('application/json');
     });
 
+    it('Can detect json file with exact mime type', async () => {
+        const instance = new LibmagicIO({
+            returnMimeType: true
+        });
+        const r = instance.detectFile(path.resolve(__dirname, '..', 'package.json'));
+        await expect(r).resolves.toBe('application/json');
+    });
+
     it('Can detect json file concurrently', async () => {
         const instance = globalInstance;
         const jsonPath = path.resolve(__dirname, '..', 'package.json');

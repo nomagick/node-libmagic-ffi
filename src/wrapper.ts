@@ -10,7 +10,7 @@ const configMap = {
     followSymlink: constants.MAGIC_SYMLINK,
     checkInsideCompressedFiles: constants.MAGIC_COMPRESS,
     checkInsideDeviceFiles: constants.MAGIC_DEVICES,
-    returnMimeType: constants.MAGIC_MIME,
+    returnMimeType: constants.MAGIC_MIME_TYPE,
     returnAllMatches: constants.MAGIC_CONTINUE,
     printWarningsToStdErr: constants.MAGIC_CHECK,
     preserveATime: constants.MAGIC_PRESERVE_ATIME,

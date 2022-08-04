@@ -1,6 +1,7 @@
 import ffi from 'ffi-napi';
 import ref from 'ref-napi';
 import constants from './constants';
+import fs from 'fs';
 
 // magic_t is a pointer to a `magic_set` struct
 // which should be treated as opaque
@@ -9,7 +10,12 @@ export const ptr = ref.refType(ref.types.void);
 export const ptr_ptr = ref.refType(ptr);
 export const size_t_ptr = ref.refType(ref.types.size_t);
 
-export const libmagic = new ffi.Library('libmagic', {
+// MacOS being special for `LD_LIBRARY_PATH` etc is not very effective.
+// MacOS arm64 even special for its library not linked to common places.
+const dlOpenPath = process.arch === 'arm64' && process.platform === 'darwin' && fs.existsSync('/opt/homebrew/lib/libmagic.dylib') ?
+    '/opt/homebrew/lib/libmagic.dylib' : 'libmagic';
+
+export const libmagic = new ffi.Library(dlOpenPath, {
     magic_open: [magic_t, ['int']],
     magic_close: ['void', [magic_t]],
 

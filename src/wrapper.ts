@@ -1,4 +1,3 @@
-import type { Pointer } from 'ref-napi';
 import constants from './constants';
 import { libmagic } from './libmagic';
 import { promisify } from 'util';
@@ -62,14 +61,14 @@ function getConfigObj() {
     return obj;
 }
 
-const pMagicVersion = promisify(libmagic.magic_version.async);
-const pMagicOpen = promisify(libmagic.magic_open.async);
-const pMagicClose = promisify(libmagic.magic_close.async);
-const pMagicLoad = promisify(libmagic.magic_load.async);
-const pMagicDetectFile = promisify(libmagic.magic_file.async);
-const pMagicDetectBuffer = promisify(libmagic.magic_buffer.async);
+const pMagicVersion = promisify(libmagic.magic_version.async) as ()=> Promise<number>;
+const pMagicOpen = promisify(libmagic.magic_open.async) as (flag: number) => Promise<unknown>;
+const pMagicClose = promisify(libmagic.magic_close.async) as (handle: unknown) => Promise<void>;
+const pMagicLoad = promisify(libmagic.magic_load.async) as (handle: unknown, dbPath: string | null) => Promise<number>;
+const pMagicDetectFile = promisify(libmagic.magic_file.async) as (handle: unknown, fpath: string) => Promise<string>;
+const pMagicDetectBuffer = promisify(libmagic.magic_buffer.async) as (handle: unknown, buffer: Buffer | Uint8Array, len: number) => Promise<string>;
 
-function magicThrow(handle: Pointer<void>): never {
+function magicThrow(handle: unknown): never {
     const errMsg = libmagic.magic_error(handle);
     throw new Error(errMsg ? `libmagic: ${errMsg}` : 'Unknown libmagic error');
 }
@@ -79,7 +78,7 @@ type Options = ReturnType<typeof getConfigObj> & {
     pool?: pool.Options;
 };
 export class LibmagicIO {
-    pool: pool.Pool<Pointer<void>>;
+    pool: pool.Pool<unknown>;
 
     config: ReturnType<typeof getConfigObj> & {
         magicDBPath?: string;
@@ -92,37 +91,21 @@ export class LibmagicIO {
         this.pool = pool.createPool({
             create: async () => {
                 const handle = await pMagicOpen(this.config.flag);
-                (handle as any)._flag = this.config.flag;
                 const r = await pMagicLoad(handle, this.config.magicDBPath || null);
                 if (r === -1) {
                     magicThrow(handle);
                 }
-                (handle as any)._dbPath = this.config.magicDBPath;
 
                 return handle;
             },
             destroy: async (handle) => {
                 await pMagicClose(handle);
             },
-            validate: async (handle) => {
-                if ((handle as any)._flag !== this.config.flag) {
-                    return false;
-                }
-                if ((handle as any)._dbPath !== this.config.magicDBPath) {
-                    return false;
-                }
-
-                return true;
-            }
-        }, { ...this.config.pool, testOnBorrow: true })
+        }, { ...this.config.pool });
     }
 
-    async getLibmagicVersion() {
-        return this.pool.use(async () => {
-            const r = await pMagicVersion();
-
-            return r;
-        });
+    getLibmagicVersion() {
+        return pMagicVersion();
     }
 
     async close() {
@@ -145,7 +128,7 @@ export class LibmagicIO {
 
     async detectBuffer(buffer: Buffer | Uint8Array) {
         return this.pool.use(async (handle) => {
-            const r = await pMagicDetectBuffer(handle, buffer as Pointer<void>, buffer.byteLength);
+            const r = await pMagicDetectBuffer(handle, buffer, buffer.byteLength);
             if (r === null) {
                 magicThrow(handle);
             }

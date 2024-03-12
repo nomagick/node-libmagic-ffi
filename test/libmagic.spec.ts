@@ -1,7 +1,6 @@
 import { libmagic } from '..';
 import path from 'path';
 import fs from 'fs';
-import type { Pointer } from 'ref-napi';
 
 describe('Basic libmagic ffi bindings', () => {
 
@@ -39,7 +38,7 @@ describe('Basic libmagic ffi bindings', () => {
         libmagic.magic_load(handle, null);
         const jsonPath = path.resolve(__dirname, '..', 'package.json');
         const buff = fs.readFileSync(jsonPath);
-        const r = libmagic.magic_buffer(handle, buff as Pointer<void>, buff.byteLength);
+        const r = libmagic.magic_buffer(handle, buff, buff.byteLength);
         libmagic.magic_close(handle);
         expect(r).toContain('application/json');
     });
@@ -48,7 +47,7 @@ describe('Basic libmagic ffi bindings', () => {
         const handle = libmagic.magic_open(libmagic.MAGIC_SYMLINK | libmagic.MAGIC_MIME);
         libmagic.magic_load(handle, null);
         const r = await new Promise((resolve, reject) => {
-            libmagic.magic_file.async(handle, path.resolve(__dirname, '..', 'package.json'), (err, r) => {
+            libmagic.magic_file.async(handle, path.resolve(__dirname, '..', 'package.json'), (err: any, r: any) => {
                 if (err) {
                     return reject(err);
                 }

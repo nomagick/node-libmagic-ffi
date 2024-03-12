@@ -1,14 +1,11 @@
-import ffi from 'ffi-napi';
-import ref from 'ref-napi';
+import koffi from 'koffi';
 import constants from './constants';
 import fs from 'fs';
 
 // magic_t is a pointer to a `magic_set` struct
 // which should be treated as opaque
-export const magic_t = ref.refType(ref.types.void);
-export const ptr = ref.refType(ref.types.void);
-export const ptr_ptr = ref.refType(ptr);
-export const size_t_ptr = ref.refType(ref.types.size_t);
+export const magic_t = koffi.opaque();
+export const magic_t_ptr = koffi.pointer(magic_t);
 
 let dlOpenPath = 'libmagic';
 switch (process.platform) {
@@ -31,39 +28,11 @@ switch (process.platform) {
     }
 }
 
-let tryMagic;
+let sharedLib;
 let lastError;
 for (const x of [dlOpenPath, 'libmagic.1', 'libmagic'] as const) {
     try {
-        tryMagic = new ffi.Library(x, {
-            magic_open: [magic_t, ['int']],
-            magic_close: ['void', [magic_t]],
-
-            magic_getpath: ['CString', ['CString', 'int']],
-
-            magic_file: ['CString', [magic_t, 'CString']],
-            magic_descriptor: ['CString', [magic_t, 'int']],
-            magic_buffer: ['CString', [magic_t, ptr, 'size_t']],
-
-            magic_error: ['CString', [magic_t]],
-            magic_getflags: ['int', [magic_t]],
-            magic_setflags: ['int', [magic_t, 'int']],
-
-            magic_version: ['int', []],
-
-            magic_load: ['int', [magic_t, 'CString']],
-            magic_load_buffers: ['int', [magic_t, ptr_ptr, size_t_ptr, 'size_t']],
-
-            magic_compile: ['int', [magic_t, 'CString']],
-            magic_check: ['int', [magic_t, 'CString']],
-            magic_list: ['int', [magic_t, 'CString']],
-
-            magic_errno: ['int', [magic_t]],
-
-            magic_setparam: ['int', [magic_t, 'int', ptr]],
-            magic_getparam: ['int', [magic_t, 'int', ptr]],
-
-        }, constants);
+        sharedLib = koffi.load(x);
 
         break;
     } catch (err) {
@@ -72,11 +41,31 @@ for (const x of [dlOpenPath, 'libmagic.1', 'libmagic'] as const) {
     }
 }
 
-if (!tryMagic) {
+if (!sharedLib) {
     throw lastError;
 }
 
-export const libmagic = tryMagic;
+export const libmagic = {
+    ...constants,
+    magic_open: sharedLib.func('magic_open', magic_t_ptr, ['int']),
+    magic_close: sharedLib.func('magic_close', 'void', [magic_t_ptr]),
+    magic_getpath: sharedLib.func('magic_getpath', 'string', ['string', 'int']),
+    magic_file: sharedLib.func('magic_file', 'string', [magic_t_ptr, 'string']),
+    magic_descriptor: sharedLib.func('magic_descriptor', 'string', [magic_t_ptr, 'int']),
+    magic_buffer: sharedLib.func('magic_buffer', 'string', [magic_t_ptr, 'void*', 'size_t']),
+    magic_error: sharedLib.func('magic_error', 'string', [magic_t_ptr]),
+    magic_getflags: sharedLib.func('magic_getflags', 'int', [magic_t_ptr]),
+    magic_setflags: sharedLib.func('magic_setflags', 'int', [magic_t_ptr, 'int']),
+    magic_version: sharedLib.func('magic_version', 'int', []),
+    magic_load: sharedLib.func('magic_load', 'int', [magic_t_ptr, 'string']),
+    magic_load_buffers: sharedLib.func('magic_load_buffers', 'int', [magic_t_ptr, 'void**', 'size_t*', 'size_t']),
+    magic_compile: sharedLib.func('magic_compile', 'int', [magic_t_ptr, 'string']),
+    magic_check: sharedLib.func('magic_check', 'int', [magic_t_ptr, 'string']),
+    magic_list: sharedLib.func('magic_list', 'int', [magic_t_ptr, 'string']),
+    magic_errno: sharedLib.func('magic_errno', 'int', [magic_t_ptr]),
+    magic_setparam: sharedLib.func('magic_setparam', 'int', [magic_t_ptr, 'int', 'void*']),
+    magic_getparam: sharedLib.func('magic_getparam', 'int', [magic_t_ptr, 'int', 'void*']),
+};
 
 export default libmagic;
 

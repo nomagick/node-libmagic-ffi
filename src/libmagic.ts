@@ -30,9 +30,20 @@ switch (process.platform) {
 
 let sharedLib;
 let lastError;
+
+const PLATFORM_SPECIFIC_SUFFIX = {
+    win32: '.dll',
+    darwin: '.dylib',
+    linux: '.so',
+};
+
+const dynamicLibSuffix = Reflect.get(PLATFORM_SPECIFIC_SUFFIX, process.platform) || '.so';
+
 for (const x of [dlOpenPath, 'libmagic.1', 'libmagic'] as const) {
+    const fixedName = x.toLowerCase().endsWith(dynamicLibSuffix) ? x : x + dynamicLibSuffix;
+
     try {
-        sharedLib = koffi.load(x);
+        sharedLib = koffi.load(fixedName);
 
         break;
     } catch (err) {

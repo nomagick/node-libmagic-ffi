@@ -40,7 +40,8 @@ const PLATFORM_SPECIFIC_SUFFIX = {
 const dynamicLibSuffix = Reflect.get(PLATFORM_SPECIFIC_SUFFIX, process.platform) || '.so';
 
 for (const x of [dlOpenPath, 'libmagic.1', 'libmagic'] as const) {
-    const fixedName = x.toLowerCase().endsWith(dynamicLibSuffix) ? x : x + dynamicLibSuffix;
+    const fl = x.toLowerCase();
+    const fixedName = (fl.includes(`${dynamicLibSuffix}.`) || fl.endsWith(dynamicLibSuffix)) ? x : x + dynamicLibSuffix;
 
     try {
         sharedLib = koffi.load(fixedName);

@@ -14,7 +14,7 @@
   "url": "https://github.com/nomagick/node-libmagic-ffi",
   "dependencies": {
     "generic-pool": "^3.9.0",
-    "koffi": "^2.8.0",
+    "koffi": "^2.8.4",
     "tslib": "^2.4.0"
   },
   "devDependencies": {
